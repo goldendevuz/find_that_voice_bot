@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: find_that_voice
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres18_data:/var/lib/postgresql
     ports:
       - "5433:5432"
 
@@ -37,4 +37,4 @@ services:
       - .:/app
 
 volumes:
-  postgres_data:
+  postgres18_data:
