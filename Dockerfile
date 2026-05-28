@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc libpq-dev gettext  jq \
+    && apt-get install -y --no-install-recommends gcc libpq-dev gettext jq make \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
