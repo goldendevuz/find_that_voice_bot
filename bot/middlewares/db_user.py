@@ -2,6 +2,18 @@ from typing import Callable, Dict, Any, Awaitable
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 from asgiref.sync import sync_to_async
+
+async def get_user(telegram_id: int) -> BotUser:
+    """Retrieve or create a BotUser instance asynchronously."""
+    user, _ = await sync_to_async(BotUser.objects.get_or_create)(
+        telegram_id=telegram_id,
+        defaults={
+            "username": None,
+            "first_name": "",
+        },
+    )
+    return user
+
 from voices.models import BotUser
 
 class DbUserMiddleware(BaseMiddleware):
