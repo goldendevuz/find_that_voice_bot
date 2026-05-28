@@ -1,25 +1,19 @@
 from django.db import models
-import uuid
 from django.utils import timezone
+import uuid
 
 
-class BaseModel(models.Model):
+class TimestampBase(models.Model):
     """
-    Abstract base model with UUID PK, timestamps, and common utilities.
-    All models should inherit from this class.
+    Abstract base model with timestamps and common utilities.
     """
 
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-        unique=True,
-    )
     created = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Created At",
         help_text="Timestamp when the object was created",
     )
+
     modified = models.DateTimeField(
         auto_now=True,
         verbose_name="Modified At",
@@ -28,60 +22,112 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ["-created"]  # Default ordering: newest first
+        ordering = ["-created"]
         get_latest_by = "created"
-
-    def __str__(self):
-        """
-        Returns a string representation.
-        If the model has a 'name' or 'title' attribute, return it, else UUID.
-        """
-        for attr in ["name", "title", "full_name"]:
-            if hasattr(self, attr):
-                value = getattr(self, attr)
-                if value:
-                    return str(value)
-        return str(self.id)
-
-    def save(self, *args, **kwargs):
-        """
-        Can be overridden in child models for custom pre-save behavior.
-        """
-        super().save(*args, **kwargs)
 
     @property
     def age_seconds(self):
         """
-        Returns the age of the object in seconds since creation.
+        Returns object age in seconds.
         """
         return (timezone.now() - self.created).total_seconds()
 
 
-class BotUser(BaseModel):
-    telegram_id = models.BigIntegerField(unique=True)
-    language = models.CharField(max_length=5, default='uz')
-    username = models.CharField(max_length=255, null=True, blank=True)
-    first_name = models.CharField(max_length=255)
-    joined_at = models.DateTimeField(auto_now_add=True)
+class UUIDBase(models.Model):
+    """
+    Abstract base model with UUID primary key.
+    """
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        unique=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class BotUser(TimestampBase):
+    """
+    Telegram user model.
+    Telegram ID is used as the primary key because it is already globally unique.
+    """
+
+    telegram_id = models.BigIntegerField(primary_key=True)
+
+    language = models.CharField(
+        max_length=5,
+        default="uz",
+    )
+
+    username = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
+    first_name = models.CharField(
+        max_length=255,
+    )
+
+    joined_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta(TimestampBase.Meta):
+        db_table = "voices_botuser"
 
     def __str__(self):
         return self.username or self.first_name or str(self.telegram_id)
-    
 
-class Voice(BaseModel):
-    owner = models.ForeignKey(BotUser, on_delete=models.CASCADE, related_name='voices')
-    file_id = models.CharField(max_length=255)
-    file_unique_id = models.CharField(max_length=255)
-    description = models.TextField(db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    usage_count = models.PositiveIntegerField(default=0)
 
-    class Meta:
-        # Prevent the same user from saving the exact same voice twice
-        # or maybe we just allow it? The prompt says "NEVER reupload files, reuse Telegram cached file_id". 
-        # But maybe a user wants to tag the same voice multiple times? Let's just keep it simple.
+class Voice(UUIDBase, TimestampBase):
+    """
+    Stored Telegram voice/audio reference.
+    """
+
+    owner = models.ForeignKey(
+        BotUser,
+        on_delete=models.CASCADE,
+        related_name="voices",
+    )
+
+    file_id = models.CharField(
+        max_length=255,
+    )
+
+    file_unique_id = models.CharField(
+        max_length=255,
+    )
+
+    description = models.TextField(
+        db_index=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    usage_count = models.PositiveIntegerField(
+        default=0,
+    )
+
+    class Meta(TimestampBase.Meta):
+        db_table = "voices_voice"
+
         constraints = [
-            models.UniqueConstraint(fields=['owner', 'file_unique_id'], name='unique_voice_per_user')
+            models.UniqueConstraint(
+                fields=["owner", "file_unique_id"],
+                name="unique_voice_per_user",
+            )
+        ]
+
+        indexes = [
+            models.Index(fields=["file_unique_id"]),
+            models.Index(fields=["usage_count"]),
+            models.Index(fields=["created_at"]),
         ]
 
     def __str__(self):
