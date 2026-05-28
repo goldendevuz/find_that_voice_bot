@@ -2,6 +2,7 @@
 from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.fsm.context import FSMContext
 from django.utils import translation
 from django.utils.translation import gettext
 from asgiref.sync import sync_to_async
@@ -11,7 +12,8 @@ router = Router()
 
 # /lang command: show current language and offer inline buttons
 @router.message(Command(commands=["lang"]))
-async def lang_command(message: types.Message):
+async def lang_command(message: types.Message, state: FSMContext):
+    await state.clear()
     user = await get_user(message.from_user.id)
     current_lang = user.language
     text = gettext("Current language:") + f" {current_lang}"

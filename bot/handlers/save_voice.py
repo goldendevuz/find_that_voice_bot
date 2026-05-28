@@ -1,5 +1,5 @@
 from aiogram import Router, F, types
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from asgiref.sync import sync_to_async
@@ -12,8 +12,14 @@ router = Router()
 class SaveVoiceStates(StatesGroup):
     waiting_for_description = State()
 
+@router.message(Command("cancel"))
+async def cancel(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Cancelled")
+
 @router.message(CommandStart())
-async def cmd_start(message: types.Message):
+async def cmd_start(message: types.Message, state: FSMContext):
+    await state.clear()
     await message.answer(
         gettext(
             "👋 Welcome to Find That Voice!\n\n"
