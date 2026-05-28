@@ -1,0 +1,4 @@
+msgid ""
+msgstr """\nProject-Id-Version: find_that_voice_bot\nReport-Msgid-Bugs-To: \nPOT-Creation-Date: 2026-05-28 04:47:00\nPO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\nLast-Translator: Your Name <you@example.com>\nLanguage-Team: Uzbek\nLanguage: uz\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=1; plural=0;\n"""\n
+# Example translation\nmsgid "Hello, world!"
+msgstr "Salom, dunyo!"

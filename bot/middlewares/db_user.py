@@ -36,6 +36,9 @@ class DbUserMiddleware(BaseMiddleware):
             
         if updated:
             await sync_to_async(db_user.save)()
+
+        # Activate user language for subsequent translations
+        activate(db_user.language)
             
         data["db_user"] = db_user
         

@@ -10,7 +10,7 @@ django.setup()
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from bot.handlers import save_voice, inline
+from bot.handlers import save_voice, inline, lang
 from bot.middlewares.db_user import DbUserMiddleware
 
 async def main():

@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'voices',
+    'rosetta',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +77,16 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
+
+# Internationalization settings
+LOCALE_PATHS = [BASE_DIR / 'locale']
+LANGUAGES = [
+    ('en', 'English'),
+    ('ru', 'Russian'),
+    ('uz', 'Uzbek'),
+]
+USE_I18N = True
+USE_L10N = True
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True

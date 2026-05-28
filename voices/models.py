@@ -2,6 +2,7 @@ from django.db import models
 
 class BotUser(models.Model):
     telegram_id = models.BigIntegerField(primary_key=True)
+    language = models.CharField(max_length=5, default='en')
     username = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255)
     joined_at = models.DateTimeField(auto_now_add=True)
