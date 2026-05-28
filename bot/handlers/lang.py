@@ -3,6 +3,7 @@ from aiogram import Router, types
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from django.utils import translation
+from django.utils.translation import gettext as _
 from asgiref.sync import sync_to_async
 from bot.middlewares.db_user import get_user
 
@@ -13,14 +14,12 @@ router = Router()
 async def lang_command(message: types.Message):
     user = await get_user(message.from_user.id)
     current_lang = user.language
-    text = f"Current language: {current_lang}"
+    text = _("Current language:") + f" {current_lang}"
     # Inline buttons for language selection
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="English", callback_data="set_lang:en"),
-            InlineKeyboardButton(text="Русский", callback_data="set_lang:ru"),
-            InlineKeyboardButton(text="O'zbek", callback_data="set_lang:uz"),
-        ]
+        [InlineKeyboardButton(text=_("🇺🇸 English"), callback_data="set_lang:en")],
+        [InlineKeyboardButton(text=_("🇷🇺 Русский"), callback_data="set_lang:ru")],
+        [InlineKeyboardButton(text=_("🇺🇿 O'zbek"), callback_data="set_lang:uz")],
     ])
     await message.answer(text, reply_markup=keyboard)
 
@@ -36,6 +35,6 @@ async def set_language(callback: types.CallbackQuery):
     # Activate language for response
     translation.activate(lang_code)
     # Localized confirmation message
-    msg = translation.gettext("Language changed to") + f" {lang_code}"
+    msg = _("Language changed to") + f" {lang_code}"
     await callback.message.edit_text(msg)
     await callback.answer()

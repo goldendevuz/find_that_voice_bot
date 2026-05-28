@@ -16,5 +16,20 @@ msgstr ""
 msgid "Hello"
 msgstr "Привет"
 
+msgid "Current language:"
+msgstr "Текущий язык:"
+
+msgid "Language changed to"
+msgstr "Язык изменён на"
+
+msgid "🇺🇸 English"
+msgstr "🇺🇸 English"
+
+msgid "🇷🇺 Русский"
+msgstr "🇷🇺 Русский"
+
+msgid "🇺🇿 O'zbek"
+msgstr "🇺🇿 O'zbek"
+
 msgid "Hello, world!"
 msgstr "Привет, мир!"
