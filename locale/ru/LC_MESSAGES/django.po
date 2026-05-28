@@ -33,3 +33,21 @@ msgstr "🇺🇿 O'zbek"
 
 msgid "Hello, world!"
 msgstr "Привет, мир!"
+
+msgid "👋 Welcome to Find That Voice!\n\nSend me any voice message, and I'll ask you for a description. Later, you can search for it in any chat by typing:\n`@FindThatVoiceBot <your description>`"
+msgstr "👋 Добро пожаловать в Find That Voice!\n\nОтправьте любое голосовое сообщение, и я попрошу вас дать описание. Позже вы сможете искать его в любом чате, введя:\n`@FindThatVoiceBot <ваше описание>`"
+
+msgid "🎙️ Voice received! Now, send me a text description or keywords for this voice."
+msgstr "🎙️ Голос получен! Теперь отправьте мне текстовое описание или ключевые слова для этого голоса."
+
+msgid "✅ Voice saved successfully! You can now search for it using inline mode."
+msgstr "✅ Голос успешно сохранён! Теперь вы можете искать его в inline‑режиме."
+
+msgid "⚠️ You have already saved this voice message."
+msgstr "⚠️ Вы уже сохранили это голосовое сообщение."
+
+msgid "❌ Failed to save voice. Please try again."
+msgstr "❌ Не удалось сохранить голос. Пожалуйста, попробуйте снова."
+
+msgid "Please send text only for the description."
+msgstr "Пожалуйста, отправляйте только текст для описания."

@@ -12,6 +12,39 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "Current language:"
+msgstr "Joriy til:"
+
+msgid "Language changed to"
+msgstr "Til o'zgartirildi:"
+
+msgid "🇺🇸 English"
+msgstr "🇺🇸 Ingliz"
+
+msgid "🇷🇺 Русский"
+msgstr "🇷🇺 Rus"
+
+msgid "🇺🇿 O'zbek"
+msgstr "🇺🇿 O'zbek"
+
 # Example translation
 msgid "Hello, world!"
 msgstr "Salom, dunyo!"
+
+msgid "👋 Welcome to Find That Voice!\n\nSend me any voice message, and I'll ask you for a description. Later, you can search for it in any chat by typing:\n`@FindThatVoiceBot <your description>`"
+msgstr "👋 Find That Voice botga xush kelibsiz!\n\nIltimos har qanday ovoz xabarini yuboring, men sizdan tavsif so‘rayman. Keyin, uni har qanday suhbatda quyidagicha yozib qidirishingiz mumkin:\n`@FindThatVoiceBot <sizning tavsifingiz>`"
+
+msgid "🎙️ Voice received! Now, send me a text description or keywords for this voice."
+msgstr "🎙️ Ovoz qabul qilindi! Endi, menga ushbu ovoz uchun matnli tavsif yoki kalit so‘zlarni yuboring."
+
+msgid "✅ Voice saved successfully! You can now search for it using inline mode."
+msgstr "✅ Ovoz muvaffaqiyatli saqlandi! Endi, uni inline rejimida qidirishingiz mumkin."
+
+msgid "⚠️ You have already saved this voice message."
+msgstr "⚠️ Siz bu ovoz xabarini allaqachon saqlagan bo‘lasiz."
+
+msgid "❌ Failed to save voice. Please try again."
+msgstr "❌ Ovozni saqlashda xatolik yuz berdi. Iltimos, qayta urining."
+
+msgid "Please send text only for the description."
+msgstr "Iltimos, tavsif uchun faqat matn yuboring."
