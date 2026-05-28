@@ -33,6 +33,7 @@ async def main():
     # Routers
     dp.include_router(save_voice.router)
     dp.include_router(inline.router)
+    dp.include_router(lang.router)
 
     logging.info("Starting bot...")
     await dp.start_polling(bot)
