@@ -70,6 +70,8 @@ class BotUser(TimestampBase):
 
     first_name = models.CharField(
         max_length=255,
+        null=True,
+        blank=True,
     )
 
     joined_at = models.DateTimeField(
