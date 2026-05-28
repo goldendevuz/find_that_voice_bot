@@ -1,10 +1,12 @@
 import uuid
 from aiogram import Router, F
-from aiogram.types import InlineQuery, InlineQueryResultCachedVoice, ChosenInlineResult
+from aiogram.types import InlineQuery, InlineQueryResultCachedVoice, ChosenInlineResult, InlineKeyboardMarkup, InlineKeyboardButton
 from asgiref.sync import sync_to_async
-from django.db.models import F as DjangoF
+from django.db.models import F as DjangoF, Q
+from django.core.cache import cache
 
 from voices.models import Voice, BotUser
+from bot.utils.cache import cache_key, invalidate_inline_cache
 
 router = Router()
 
@@ -17,30 +19,44 @@ async def inline_query_handler(query: InlineQuery, db_user: BotUser):
     
     @sync_to_async
     def search_voices():
-        qs = Voice.objects.all()
+        qs = Voice.objects.filter(is_active=True).filter(
+            Q(is_public=True) | Q(owner=db_user)
+        )
         if text:
-            # Simple ILIKE search
             qs = qs.filter(description__icontains=text)
-        
-        # Order by usage count for better relevance, limit to 50 (Telegram max)
+        # Order by usage count, limit to 50
         return list(qs.order_by('-usage_count', '-created_at')[:50])
         
+    # Check cache first
+    cache_key_str = cache_key(db_user.telegram_id, text)
+    cached = cache.get(cache_key_str)
+    if cached:
+        await query.answer(cached, cache_time=600, is_personal=False)
+        return
+
     voices = await search_voices()
-    
+
     results = []
     for voice in voices:
-        # Telegram requires a unique string ID for each inline result
         result_id = str(voice.id)
-        
+        # Inline keyboard for edit actions
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="✏️ Edit", callback_data=f"edit_desc:{voice.id}"),
+            InlineKeyboardButton(text="🔁 Replace", callback_data=f"replace_audio:{voice.id}"),
+            InlineKeyboardButton(text="📦 Archive", callback_data=f"archive:{voice.id}"),
+            InlineKeyboardButton(text="🗑️ Delete", callback_data=f"delete:{voice.id}")
+        ]])
         results.append(
             InlineQueryResultCachedVoice(
                 id=result_id,
                 voice_file_id=voice.file_id,
-                title=voice.description[:100],  # Title shown in inline menu
+                title=voice.description[:100],
+                reply_markup=keyboard,
             )
         )
-        
-    await query.answer(results, cache_time=5, is_personal=False)
+    # Store in cache for 10 minutes
+    cache.set(cache_key_str, results, timeout=600)
+    await query.answer(results, cache_time=600, is_personal=False)
 
 
 @router.chosen_inline_result()

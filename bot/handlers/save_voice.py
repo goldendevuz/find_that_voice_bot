@@ -5,7 +5,8 @@ from aiogram.fsm.state import State, StatesGroup
 from asgiref.sync import sync_to_async
 from django.db import IntegrityError
 from django.utils.translation import gettext
-from voices.models import Voice, BotUser
+from django.core.cache import cache
+from bot.handlers.inline import cache_key
 
 router = Router()
 
@@ -67,6 +68,7 @@ async def handle_description(message: types.Message, state: FSMContext, db_user:
     except Exception as e:
         await message.reply(gettext("❌ Failed to save voice. Please try again."))
     finally:
+        await cache.delete(cache_key(db_user.telegram_id, ""))
         await state.clear()
 
 @router.message(SaveVoiceStates.waiting_for_description, ~F.text)
