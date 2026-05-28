@@ -15,7 +15,7 @@ class BotUserAdmin(BaseAdmin):
 
 @admin.register(Voice)
 class VoiceAdmin(BaseAdmin):
-    list_display = ('id', 'owner', 'description', 'usage_count', 'created_at')
+    list_display = ('id', 'owner', 'description', 'usage_count', 'created')
     search_fields = ('description', 'owner__username', 'owner__telegram_id')
-    list_filter = ('created_at',)
+    list_filter = ('created',)
     readonly_fields = ('file_id', 'file_unique_id')

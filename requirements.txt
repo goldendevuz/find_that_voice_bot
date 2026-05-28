@@ -1,6 +1,8 @@
-Django==5.0.6
+Django==5.1.15
 aiogram==3.6.0
 psycopg2-binary==2.9.9
 dj-database-url==2.1.0
-python-dotenv==1.0.1
+python-dotenv==1.2.2
 django-rosetta==0.10.0
+django-jazzmin==3.0.4
+django-redis==6.0.0

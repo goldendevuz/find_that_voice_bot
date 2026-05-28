@@ -1,42 +1,49 @@
-
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.fsm.context import FSMContext
 from django.utils import translation
 from django.utils.translation import gettext
 from asgiref.sync import sync_to_async
-from bot.middlewares.db_user import get_user
+
+from voices.models import BotUser
 
 router = Router()
 
-# /lang command: show current language and offer inline buttons
-@router.message(Command(commands=["lang"]))
-async def lang_command(message: types.Message, state: FSMContext):
+
+# /lang command
+@router.message(Command("lang"))
+async def lang_command(message: types.Message, state: FSMContext, db_user: BotUser):
     await state.clear()
-    user = await get_user(message.from_user.id)
-    current_lang = user.language
+
+    current_lang = db_user.language
+
     text = gettext("Current language:") + f" {current_lang}"
-    # Inline buttons for language selection
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text=gettext("🇺🇸 English"), callback_data="set_lang:en")],
-        [InlineKeyboardButton(text=gettext("🇷🇺 Русский"), callback_data="set_lang:ru")],
-        [InlineKeyboardButton(text=gettext("🇺🇿 O'zbek"), callback_data="set_lang:uz")],
-    ])
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🇺🇸 English", callback_data="set_lang:en")],
+            [InlineKeyboardButton(text="🇷🇺 Русский", callback_data="set_lang:ru")],
+            [InlineKeyboardButton(text="🇺🇿 O'zbek", callback_data="set_lang:uz")],
+        ]
+    )
+
     await message.answer(text, reply_markup=keyboard)
 
-# Callback handler to change language
-@router.callback_query(lambda c: c.data.startswith("set_lang:"))
-async def set_language(callback: types.CallbackQuery):
-    _, lang_code = callback.data.split(":", 1)
-    user = await get_user(callback.from_user.id)
-    # Update language in DB
-    user.language = lang_code
-    # Save synchronously using sync_to_async
-    await sync_to_async(user.save)()
-    # Activate language for response
+
+# language switch callback
+@router.callback_query(F.data.startswith("set_lang:"))
+async def set_language(callback: types.CallbackQuery, db_user: BotUser):
+    lang_code = callback.data.split(":", 1)[1]
+
+    # update DB
+    db_user.language = lang_code
+    await sync_to_async(db_user.save)()
+
+    # activate locale for current request
     translation.activate(lang_code)
-    # Localized confirmation message
+
     msg = gettext("Language changed to") + f" {lang_code}"
+
     await callback.message.edit_text(msg)
     await callback.answer()

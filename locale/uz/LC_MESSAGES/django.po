@@ -41,7 +41,7 @@ msgid "✅ Voice saved successfully! You can now search for it using inline mode
 msgstr "✅ Ovoz muvaffaqiyatli saqlandi! Endi, uni inline rejimida qidirishingiz mumkin."
 
 msgid "⚠️ You have already saved this voice message."
-msgstr "⚠️ Siz bu ovoz xabarini allaqachon saqlagan bo‘lasiz."
+msgstr "⚠️ Siz bu ovoz xabarini allaqachon saqlagansiz."
 
 msgid "❌ Failed to save voice. Please try again."
 msgstr "❌ Ovozni saqlashda xatolik yuz berdi. Iltimos, qayta urining."
