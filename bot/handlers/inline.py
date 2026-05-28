@@ -1,58 +1,69 @@
-import uuid
-from aiogram import Router, F
+import json
+from aiogram import Router
 from aiogram.types import InlineQuery, InlineQueryResultCachedVoice, ChosenInlineResult
 from asgiref.sync import sync_to_async
-from django.db.models import F as DjangoF
+from django.db.models import Q, F
+from django.core.cache import cache
 
-from voices.models import Voice, BotUser
+from voices.models import Voice
 
 router = Router()
 
+
+def cache_key(user_id: int, query: str):
+    return f"voice_search:{user_id}:{query.strip().lower()}"
+
+
 @router.inline_query()
-async def inline_query_handler(query: InlineQuery, db_user: BotUser):
-    text = query.query.strip()
-    
-    # We will search globally across all voices to support the "shared" aspect,
-    # but could be filtered by db_user if we wanted it strictly personal.
-    
+async def inline_query_handler(query: InlineQuery, db_user):
+    text = query.query.strip().lower()
+    key = cache_key(db_user.telegram_id, text)
+
+    cached = cache.get(key)
+    if cached:
+        return await query.answer(cached, cache_time=30, is_personal=True)
+
     @sync_to_async
-    def search_voices():
-        qs = Voice.objects.all()
-        if text:
-            # Simple ILIKE search
-            qs = qs.filter(description__icontains=text)
-        
-        # Order by usage count for better relevance, limit to 50 (Telegram max)
-        return list(qs.order_by('-usage_count', '-created_at')[:50])
-        
-    voices = await search_voices()
-    
-    results = []
-    for voice in voices:
-        # Telegram requires a unique string ID for each inline result
-        result_id = str(voice.id)
-        
-        results.append(
-            InlineQueryResultCachedVoice(
-                id=result_id,
-                voice_file_id=voice.file_id,
-                title=voice.description[:100],  # Title shown in inline menu
-            )
+    def search():
+        qs = Voice.objects.filter(
+            is_active=True,
+            is_archived=False
+        ).filter(
+            Q(is_public=True) | Q(owner=db_user)
         )
-        
-    await query.answer(results, cache_time=5, is_personal=False)
+
+        if text:
+            qs = qs.filter(description__icontains=text)
+
+        return list(qs.order_by("-usage_count", "-created")[:50])
+
+    voices = await search()
+
+    results = [
+        InlineQueryResultCachedVoice(
+            id=str(v.id),
+            voice_file_id=v.file_id,
+            title=v.description[:80],
+        )
+        for v in voices
+    ]
+
+    cache.set(key, results, timeout=600)
+
+    await query.answer(results, cache_time=30, is_personal=True)
 
 
 @router.chosen_inline_result()
-async def chosen_inline_result_handler(chosen_result: ChosenInlineResult):
-    # The chosen_result.result_id is our voice.id
+async def chosen_inline_result_handler(chosen: ChosenInlineResult):
     try:
-        voice_id = int(chosen_result.result_id)
-        
+        voice_id = chosen.result_id
+
         @sync_to_async
-        def increment_usage():
-            Voice.objects.filter(id=voice_id).update(usage_count=DjangoF('usage_count') + 1)
-            
-        await increment_usage()
-    except (ValueError, TypeError):
+        def inc():
+            Voice.objects.filter(id=voice_id).update(
+                usage_count=F("usage_count") + 1
+            )
+
+        await inc()
+    except Exception:
         pass

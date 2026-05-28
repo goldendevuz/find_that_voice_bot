@@ -4,21 +4,8 @@ import uuid
 
 
 class TimestampBase(models.Model):
-    """
-    Abstract base model with timestamps and common utilities.
-    """
-
-    created = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Created At",
-        help_text="Timestamp when the object was created",
-    )
-
-    modified = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Modified At",
-        help_text="Timestamp when the object was last modified",
-    )
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
@@ -27,17 +14,10 @@ class TimestampBase(models.Model):
 
     @property
     def age_seconds(self):
-        """
-        Returns object age in seconds.
-        """
         return (timezone.now() - self.created).total_seconds()
 
 
 class UUIDBase(models.Model):
-    """
-    Abstract base model with UUID primary key.
-    """
-
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -50,35 +30,15 @@ class UUIDBase(models.Model):
 
 
 class BotUser(TimestampBase):
-    """
-    Telegram user model.
-    Telegram ID is used as the primary key because it is already globally unique.
-    """
-
     telegram_id = models.BigIntegerField(primary_key=True)
 
-    language = models.CharField(
-        max_length=5,
-        default="uz",
-    )
+    language = models.CharField(max_length=5, default="uz")
+    username = models.CharField(max_length=255, null=True, blank=True)
+    first_name = models.CharField(max_length=255, null=True, blank=True)
 
-    username = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-    )
+    joined_at = models.DateTimeField(auto_now_add=True)
 
-    first_name = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True,
-    )
-
-    joined_at = models.DateTimeField(
-        auto_now_add=True,
-    )
-
-    class Meta(TimestampBase.Meta):
+    class Meta:
         db_table = "voices_botuser"
 
     def __str__(self):
@@ -86,37 +46,25 @@ class BotUser(TimestampBase):
 
 
 class Voice(UUIDBase, TimestampBase):
-    """
-    Stored Telegram voice/audio reference.
-    """
-
     owner = models.ForeignKey(
         BotUser,
         on_delete=models.CASCADE,
         related_name="voices",
     )
 
-    file_id = models.CharField(
-        max_length=255,
-    )
+    file_id = models.CharField(max_length=255)
+    file_unique_id = models.CharField(max_length=255)
 
-    file_unique_id = models.CharField(
-        max_length=255,
-    )
+    description = models.TextField(db_index=True)
 
-    description = models.TextField(
-        db_index=True,
-    )
+    usage_count = models.PositiveIntegerField(default=0)
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-    )
+    # CORE FEATURE FLAGS
+    is_public = models.BooleanField(default=False)     # default PRIVATE
+    is_active = models.BooleanField(default=True)
+    is_archived = models.BooleanField(default=False)
 
-    usage_count = models.PositiveIntegerField(
-        default=0,
-    )
-
-    class Meta(TimestampBase.Meta):
+    class Meta:
         db_table = "voices_voice"
 
         constraints = [
@@ -129,7 +77,9 @@ class Voice(UUIDBase, TimestampBase):
         indexes = [
             models.Index(fields=["file_unique_id"]),
             models.Index(fields=["usage_count"]),
-            models.Index(fields=["created_at"]),
+            models.Index(fields=["created"]),
+            models.Index(fields=["is_public"]),
+            models.Index(fields=["is_active"]),
         ]
 
     def __str__(self):
