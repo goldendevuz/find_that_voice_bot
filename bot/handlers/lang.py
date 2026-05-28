@@ -1,16 +1,17 @@
 import json
 from aiogram import Router, types
+from aiogram.filters import Command
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from django.utils import translation
-from django.db import transaction
+from asgiref.sync import sync_to_async
 from bot.middlewares.db_user import get_user
 
 router = Router()
 
 # /lang command: show current language and offer inline buttons
-@router.message(commands=["lang"])
+@router.message(Command(commands=["lang"]))
 async def lang_command(message: types.Message):
-    user: get_user = await get_user(message.from_user.id)
+    user = await get_user(message.from_user.id)
     current_lang = user.language
     text = f"Current language: {current_lang}"
     # Inline buttons for language selection
@@ -28,10 +29,10 @@ async def lang_command(message: types.Message):
 async def set_language(callback: types.CallbackQuery):
     _, lang_code = callback.data.split(":", 1)
     user = await get_user(callback.from_user.id)
-    # Update language in DB atomically
-    await transaction.on_commit(lambda: None)  # placeholder to ensure async context
+    # Update language in DB
     user.language = lang_code
-    await user.save()
+    # Save synchronously using sync_to_async
+    await sync_to_async(user.save)()
     # Activate language for response
     translation.activate(lang_code)
     # Localized confirmation message
