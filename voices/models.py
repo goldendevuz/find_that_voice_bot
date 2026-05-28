@@ -58,7 +58,7 @@ class BaseModel(models.Model):
 
 
 class BotUser(BaseModel):
-    telegram_id = models.BigIntegerField(primary_key=True)
+    telegram_id = models.BigIntegerField(unique=True)
     language = models.CharField(max_length=5, default='uz')
     username = models.CharField(max_length=255, null=True, blank=True)
     first_name = models.CharField(max_length=255)
@@ -66,7 +66,7 @@ class BotUser(BaseModel):
 
     def __str__(self):
         return self.username or self.first_name or str(self.telegram_id)
-
+    
 
 class Voice(BaseModel):
     owner = models.ForeignKey(BotUser, on_delete=models.CASCADE, related_name='voices')
